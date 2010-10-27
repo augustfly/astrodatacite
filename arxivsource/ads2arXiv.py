@@ -2,20 +2,28 @@
 
 import os
 import sys
+import gzip
 import random
 import tarfile
 import tempfile
 import time
 import urllib
+import mimetypes as mime
 import pyparsing as pp
 
 from datetime import datetime
+from glob import glob1 as glob
 from lxml import etree
 from urlparse import urlparse
-from arxiv import findRefType
 
-xmlfile = 'query002.xml'
-arxivroot = '/proj/adsduo/abstracts/sources/ArXiv/fulltext'
+
+adsDIR = '/proj/adsduo/abstracts/sources/ArXiv/fulltext'
+adsDIR = '/Users/aamn/Projects/Seamless/Studies and Projects/ADS_DataLinks/ArXivData'
+arxivURL = 'http://arxiv.org/e-print/'
+arXivArchives = ['astro-ph', 'cond-mat', 'gr-qc', 'hep-ex', 'hep-lat',
+                 'hep-ph', 'hep-th', 'math-ph', 'nucl-ex', 'nucl-th',
+                 'physics', 'quant-ph', 'math', 'nlin', 'cs', 'q-bio',
+                 'q-fin', 'stat']
 
 tagformats = {}
 tagformats['eprintid'] = lambda x: x and x[0] or ''
@@ -33,8 +41,9 @@ rsb = pp.Literal(']')
 lcb = pp.Literal('{')
 rcb = pp.Literal('}')
 
-
 class TeXCmd(object):
+    """ class container for LaTeX commands
+    """
     cmd = 'begin'
     opt = ''
     req = 'document'
@@ -49,17 +58,82 @@ class TeXCmd(object):
 #    parsed = urlparse(template)
 #    return parsed.query
 
-def tagFormat(tag, val):
+def _tagFormat(tag, val):
+    """ function to format input val according to keyed dictionary
+        of lambda functions, "tagformats"
+    """
     if tag in tagformats.keys():
         return tagformats[tag](val)
     else:
         return val
 
+def _postarXivAction(s, loc, tok):
+    """ take a pyparsing element from pparXiv and do some stuff to it.
+        override this function to get other kinds of parameters from
+        the parsing of the arXiv ID.  This version does:
+        
+        : adds "issue" key (short year+month)
+        : checks for "version"; adds '1' if not defined
+        : adds "id"
+        : adds "adspath" key, a relative directory path for source from ADS
+        : adds the parsed arXiv id to the key 'eprintid'.
+    """
+    # create "issue"
+    tok['issue'] = tok['year'] + tok['month']
+    
+    # check for version
+    if tok.get('version') == None:
+        tok['version'] = '1'
+    
+    # various useful things.    
+    if tok['scheme'] == 'old':
+        tok['id'] = tok['archive'] + '/' + tok['issue'] + tok['number']
+        tok['adspath'] = os.path.join(*[tok.get(k) 
+                        for k in ['archive', 'fullyear']])
+    else:
+        tok['id'] = tok['issue'] + "." + tok['number']
+        tok['adspath'] = os.path.join(*[tok.get(k) 
+                        for k in ['server', 'issue']])
+    tok['eprintid'] = s
+
+def parseADSXML(xml, tags=tags):
+    """ parse ADS XML references for specific tags
+        return bibcode dict.
+        
+        required dealing with unkeyed namespaces
+    """
+    keytag = 'bibcode'
+    tree = etree.parse(xml)
+    root = tree.getroot()
+    
+    xmlns = root.nsmap
+    if xmlns.has_key(None):
+        nsurl = xmlns[None]
+        nsnew = urlparse(xmlns[None]).path.split('/')[-1]
+        if nsnew == '': nsnew = 'dummy'
+        xmlns[nsnew] = nsurl
+        xmlns.pop(None)
+        
+    records = tree.xpath('//references:record', namespaces=xmlns)
+    
+    data = {}
+    for record in records:
+        b = record.xpath('references:%s/text()' % keytag, namespaces=xmlns)[0]
+        vals = []
+        for tag in tags:
+            val = record.xpath('references:%s/text()' % tag, namespaces=xmlns)
+            vals.append(_tagFormat(tag, val))
+        data[b] = dict(zip(tags, vals))
+
+    print 'Number of records: %s\n' % len(records)
+    return data
+
 def ppTeXCmd(content, cmd='', opt_parser=None, req_parser=None,
              protect="./#:-\\", ret=''):
-    """ use pyparsing...
-        to parse a string stream for latex command(s)
-        that hav the form:  \cmd[opt]{req} and return a
+    """ latex command pypaser
+
+        Parse a string stream for latex command(s)
+        that have the form:  \cmd[opt]{req} and return a
         list of triple tuples of (cmd,opt,req)
         
         always act like content is to be scanned.
@@ -98,12 +172,17 @@ def ppTeXCmd(content, cmd='', opt_parser=None, req_parser=None,
     return [(p.cmd, p.opt, p.req) for p, s, e in pTeX]
 
 def ppDataSetID(content, protect='. / -', auth='ADS'):
-    """ pyparser for...
-        ADS, FacilityID, PrivateID
-        return parsed version
+    """ ADS DataSetID pyparser
+        
+        See:
+        Grammar has three elements: ADS, FacilityID, PrivateID
+        return parsed version as tuple
+        
         protect: protect these symbols in the parse of the PrivateId
         auth: defaults to ADS
-        the PrivateId is essentially a "URI" should/must follow the same rules.
+        
+        the PrivateId is essentially a "URI" and
+        should/must follow the same rules.
     """
     AuthorityId = pp.Literal(auth).setResultsName("AuthorityId")
     
@@ -126,20 +205,98 @@ def ppDataSetID(content, protect='. / -', auth='ADS'):
         return
     return pDataSetId.AuthorityId, pDataSetId.FacilityId, pDataSetId.PrivateId
 
-def pparXiv(content):
-    """ pyparser for dealing with old and new style classes of arXiv ids.
-        returns various tidbits like year or volume
+def pparXiv(content, auth='arXiv'):
+    """ arXiv ID pyparser
+        
+        Written to deal with old and new style classes of arXiv ids
+        (before and after 1 April 2007)
+        
+        : old-scheme    arXiv:astro-ph/0703371
+        : new-scheme    arXiv:0712.2791
 
-        : old-style    astro-ph/0703371
-        : --------->   ['old','astro-ph','2007','0703371']
-        : new-style    0712.2791
-        : --------->   ['new','','0712','2791']
+        arXiv id's may consist only of the root element as given above
+        or they may have a number of other optional words:
+        
+        : new-scheme    arXiv:0712.2791v1
+        : old-scheme    arXiv:math.GT/030936
+        
+        The main issues are these:
+        
+        1. ADS does not use version numbers in eprint IDs;
+        2. the "subject" class is not part of any URL link structure
+        3. Citations may include the subject class.
+        
+        Here is my attempt at the BNF Grammar for the arXiv IDs
+        
+        preprint ::= <auth>:<epid>
+        <auth>   ::= 'arXiv' | ...
+        <epid>   ::= <new> | <old>
+
+        <old>    ::= <archive>/<year><month><oldart>
+        <new>    ::= <year><month>.<newart>
+
+        <archive>::= OneOf('astro-ph' | 'physics' | 'q-bio' | 'cs' .... )
+
+        <year>   ::= pp.nums * 2
+        <month>  ::= pp.nums * 2 
+
+        <oldart> ::= pp.nums * 3
+        <newart> ::= pp.nums * 4
+
+        Conversion actions for the Grammar include:
+
+        <fullyear> ::= <mc><year>
+        <mc>       ::= pp.nums * 2
+        <mc>       ::= <year> > 91 -> 19
+        <mc>       ::= <year> > 00 -> 20
+
     """
-    return
+    server = pp.Literal(auth).setResultsName("server")
+
+    year = pp.Word(pp.nums, exact=2).setResultsName("year")
+    year.addParseAction(lambda tok: tok.__setitem__('fullyear',
+                        int(tok[0]) > 91 and '19' + tok[0] or '20' + tok[0]))  
+    month = pp.Word(pp.nums, exact=2).setResultsName("month")
+
+    archive = pp.oneOf(arXivArchives).setResultsName('archive')
+    subject = pp.Optional(pp.Literal(".") + 
+              pp.Word(pp.alphas, exact=2).setResultsName('subjectclass'))
+
+    newart = pp.Word(pp.nums, exact=4).setResultsName('number')
+    oldart = pp.Word(pp.nums, exact=3).setResultsName('number')
+
+    version = pp.Optional(pp.Literal('v') + \
+              pp.Word(pp.nums, exact=1).setResultsName('version'))
+
+    oldscheme = archive + subject + pp.Suppress('/') + year + month + oldart
+    newscheme = year + month + pp.Suppress(".") + newart
+
+    oldscheme.addParseAction(lambda tok: tok.__setitem__('scheme', 'old'))
+    newscheme.addParseAction(lambda tok: tok.__setitem__('scheme', 'new'))
+
+    preprint = server + pp.Suppress(":") + (oldscheme | newscheme) + version
+    preprint.addParseAction(_postarXivAction)
+
+    try:
+        return preprint.parseString(content).asDict()
+    except:
+        return {}
+
+def testpparXiv():
+    """ test function for parsing arXiv id versions
+    """
+    tests = [['arXiv:astro-ph/0703371', 'old', 'astro-ph', '07', '03', '371']]
+    tests.append(['arXiv:0712.2791', 'new', None, '07', '12', '2791'])
+    for test in tests:
+        assert pparXiv(test[0]).asList() == test[1:] #will not work
 
 def ppBibCode(content):
     """ ADS bibcode parser
-        YYYYJJJJJVVVVMPPPPA
+        
+        See:
+        
+        Grammar:
+            YYYYJJJJJVVVVMPPPPA
     """
     y_grm = pp.nums
     j_grm = pp.alphas + '.&'
@@ -166,6 +323,8 @@ def ppBibCode(content):
     return (bib.Y, bib.J, bib.V, bib.M, bib.P, bib.A)
 
 def testppBibCode():
+    """ test function for bibcode parser
+    """
     tests = [['2009AJ....137....1F', '2009', 'AJ', '137', '', '1', 'F']]
     tests.append(['2001A&A...365L...1J', '2001', 'A&A', '365', 'L', '1', 'J'])
     tests.append(['1910YalRY...1....1E', '1910', 'YalRY', '1', '', '1', 'E'])
@@ -173,77 +332,139 @@ def testppBibCode():
     for test in tests:
         assert ppBibCode(test[0]) == tuple(test[1:])
 
-def localSource(ref,type=type,root=arxivroot):
-    """ given a local directory tree containing arXiv data, confirm the existance
-        of a targeted arXiv data set/file/etc
+def getSources(epid, locale='disk',
+                 diskroot=adsDIR, urlroot=arxivURL):
+    """ given a reference and a locale, 
+        return the path to the source, 
+        downloading it as necessary.
     """
     #A:  type is a subdirectory under the root
-    #A:  ref is a 
-    return
+    #A:  ref is a
+    locales = ['disk', 'url']
+    locale = locale in locales and locale or 'disk'
     
-def downloadSource(ref, type=type):
-    """ Hacked from downloadSource in arXiv script version 0.2;
-        Copyright 2008 Tom Brown
-        Hacked 2010 August Muench
-            do not gzip.
+    wdir = ''
+    wfiles = []
+    wnames = ('file', 'type', 'encoding')
+    if locale == 'disk':
+        wdir = os.path.abspath(os.path.join(diskroot, epid['adspath']))
+        wfiles = [dict(
+                       zip(wnames,
+                           (g,) + mime.guess_type(g))) 
+                  for g in glob(wdir, '*' + epid['number'] + '.*')]
+    else:
+        wdir = tempfile.mkdtemp()
+        wfiles = ['foobar']
+#         urlroot = 'http://arxiv.org/e-print/'
+#         urltarget = urlroot + ref
+#         print ' ' * 4 + '%-10s %s' % ('target url:', urltarget)
+#         urlresult = urllib.urlretrieve(urltarget)
+#         filename, httpobj = urlresult
+#         print ' ' * 4 + '%-10s %s' % ('output file:', filename)
+#         if not os.path.exists(filename): 
+#             print ' ' * 4 + '%-10s %s' % ('exists?', os.path.exists(filename))
+#             raise IOError('tarfile not downloaded', filename)
+        
+    return wdir, wfiles
+    
+# def downloadSource(ref, type=type):
+#     """ Hacked from downloadSource in arXiv script version 0.2;
+#         Copyright 2008 Tom Brown
+#         Hacked 2010 August Muench
+#             do not gzip.
+# 
+#         actually this is entirely illegal:
+#             http://arxiv.org/robots.txt
+#                 User-agent: *
+#                     Disallow: /e-print/
+#     """
+# #    downloadPath = os.path.expanduser(downloadPath)
+# #    filename = downloadPath + os.sep + ref.replace('/', '-') + ".tar"
+#     urlroot = 'http://arxiv.org/e-print/'
+#     urltarget = urlroot + ref
+#     print ' ' * 4 + '%-10s %s' % ('target url:', urltarget)
+#     urlresult = urllib.urlretrieve(urltarget)
+#     filename, httpobj = urlresult
+#     print ' ' * 4 + '%-10s %s' % ('output file:', filename)
+#     if not os.path.exists(filename): 
+#         print ' ' * 4 + '%-10s %s' % ('exists?', os.path.exists(filename))
+#         raise IOError('tarfile not downloaded', filename)
+#     return filename
 
-        actually this is entirely illegal:
-            http://arxiv.org/robots.txt
-                User-agent: *
-                    Disallow: /e-print/
-    """
-#    downloadPath = os.path.expanduser(downloadPath)
-#    filename = downloadPath + os.sep + ref.replace('/', '-') + ".tar"
-    urlroot = 'http://arxiv.org/e-print/'
-    urltarget = urlroot + ref
-    print ' ' * 4 + '%-10s %s' % ('target url:', urltarget)
-    urlresult = urllib.urlretrieve(urltarget)
-    filename, httpobj = urlresult
-    print ' ' * 4 + '%-10s %s' % ('output file:', filename)
-    if not os.path.exists(filename): 
-        print ' ' * 4 + '%-10s %s' % ('exists?', os.path.exists(filename))
-        raise IOError('tarfile not downloaded', filename)
-    return filename
-
-def processSource(f, ext='tex', action='list', textfilter='begin{document}'):
+def processSource(s, type='application/x-tar', encoding=None, action='list',
+                  filefilter=['application/x-tex'], textfilter=''):
     """ look in tarfile f for source files of extension ext; 
         return list of all content strings, one per file.
     """
     actions = ['list', 'read']
+    content = []
+    processable = ['application/x-tex', 'application/x-tar', 'text/plain']
+
+    status = 'processing'
+    if type not in processable:
+        status = 'not processable' 
+        print ' ' * 2 + ' % -10s % s (% s)' % ('source:', s, status)
+        return content
+    else:
+        print ' ' * 2 + ' % -10s % s (% s)' % ('source:', s, status)
+        
     action = action in actions and action or 'list'
 
-    content = []
-    try:
-        tar = tarfile.open(f)    
-        files = [n for n in tar.getnames() if n.split(os.extsep)[-1] == ext]
-        print ' ' * 4 + '%-10s %s' % (ext + ' files:', len(files))
-    
-        if len(files) == 0:
+    if type == 'application/x-tar':
+        try:
+            tar = tarfile.open(s)    
+            files = [n for n in tar.getnames() 
+                     if mime.guess_type(n)[0] in filefilter]
+            print ' ' * 4 + ' % -10s % s' % ('filtered files:', len(files))
+        
+            if len(files) == 0:
+                tar.close()
+                return content
+        
+            for name in files:
+                status = 'added'
+                if action == 'list':
+                    content.append(name)
+                elif action == 'read':
+                    try:
+                        f = tar.extractfile(name)
+                        fread = f.read()
+                        f.close()
+                        if fread.count(textfilter) != 0:
+                            content.append(fread)
+                        else:
+                            status = 'ignored'
+                    except: 
+                        raise
+                print ' ' * 6 + ' % -10s % s (% s)' % ('file:', name, status)
             tar.close()
+        except Exception, e:
+            if tarfile.is_tarfile(s):
+                raise IOError('could not open tar file: ' + s)
+            else: 
+                raise IOError('source is not a tar file: ' + s)
+    else:
+        status = 'added'
+        name = os.path.basename(not encoding and s or os.path.splitext(s)[0])
+        if mime.guess_type(name) not in filefilter: 
             return content
-    
-        for name in files:
-            status = 'added'
-            if action == 'list':
-                content.append(name)
-            elif action == 'read':
-                try:
-                    f = tar.extractfile(name)
-                    fread = f.read()
-                    f.close()
-                    if fread.find(textfilter) != -1:
-                        content.append(fread)
-                    else:
-                        status = 'ignored'
-                except: 
-                    raise
-            print ' ' * 6 + '%-10s %s (%s)' % ('file:', name, status)
-            tar.close()
-    except Exception, e:
-        if tarfile.is_tarfile(f):
-            raise IOError('could not open tar file')
-        else: 
-            raise IOError('source is not a tar file')
+        if action == 'list':
+            content.append(name)
+        elif action == 'read':
+            try:
+                if encoding == 'gzip':
+                    f = gzip.open(s)
+                else:
+                    f = open(s)
+                fread = f.read()
+                f.close()
+                if fread.count(textfilter) != 0:
+                    content.append(fread)
+                else:
+                    status = 'ignored'
+            except: 
+                raise
+        print ' ' * 6 + ' % -10s % s (% s)' % ('file:', name, status)                 
     return content
 
 def cleanupSource(f):
@@ -258,7 +479,7 @@ def cleanupSource(f):
             except:
                 # either its not in existence or its not empty
                 print ': the directory'
-                print ': %s' % f 
+                print ': % s' % f 
                 if os.listdir(f) != []:
                     print ': is not empty'
                 else:
@@ -269,92 +490,64 @@ def cleanupSource(f):
                 os.remove(f)
             except:
                 print ': the file'
-                print ': %s' % f 
+                print ': % s' % f 
                 if not os.path.exists(f):
                     print ': does not exist'
                 return (-1)
     return (0)
     
-def parseADSXML(xml, tags=tags):
-    """ parse some ADS XML references for specific tags
-        return bibcode dict
-    """
-    keytag = 'bibcode'
-    tree = etree.parse(xml)
-    root = tree.getroot()
-    
-    xmlns = root.nsmap
-    if xmlns.has_key(None):
-        nsurl = xmlns[None]
-        nsnew = urlparse(xmlns[None]).path.split('/')[-1]
-        if nsnew == '': nsnew = 'dummy'
-        xmlns[nsnew] = nsurl
-        xmlns.pop(None)
-        
-    records = tree.xpath('//references:record', namespaces=xmlns)
-    
-    data = {}
-    for record in records:
-        b = record.xpath('references:%s/text()' % keytag, namespaces=xmlns)[0]
-        vals = []
-        for tag in tags:
-            val = record.xpath('references:%s/text()' % tag, namespaces=xmlns)
-            vals.append(tagFormat(tag, val))
-        data[b] = dict(zip(tags, vals))
-
-    print 'Number of records: %s\n' % len(records)
-    return data
-
-def searchArXivSource(epid, cmd='dataset',
-                      textfilter='begin{document}', tmpdir='/tmp'):
-    """ for a given eprintid, download the source, search for tex filetypes
-        filter on texfilter and search for commands cmd.
+def searchSource(content, cmd='dataset'):
+    """ for a given eprintid,
+        find and download the source, 
+        search for tex filetypes,
+        filter on texfilter
+        and search for commands cmd.
     """
     cmds = []
-    ext = 'tex'
-    try:
-        etype, eref = findRefType(epid)
-        print ' ' * 2 + 'eprint: %s (%s)' % (eref, etype) 
-        #arxivsource = downloadSource(eref, etype) #, downloadPath=tmpdir)
-        # 
-        content = processSource(arxivsource, ext=ext,
-                                textfilter=textfilter, action='read')
-        if content != []:
-            for page in content:
-                cmds.extend(ppTeXCmd(content, cmd=cmd))
-        print ' ' * 2 + 'number of "%s" codes: %s' % (cmd, len(cmds))
+    if content != []:
+        for page in content:
+            cmds.extend(ppTeXCmd(page, cmd=cmd))
+        print ' ' * 2 + 'number of "%s" codes: % s' % (cmd, len(cmds))
         for i, n in enumerate(cmds):
-            print ' ' * 4 + '%i. %s' % (i + 1, n[1])
-        cleanup = cleanupSource(tarball)
-    except Exception, e:
-        # should figure out why
-        print 'searchArXivSource failed: %s' % e.args
+            print ' ' * 4 + ' % i. % s' % (i + 1, n[1])
     return cmds
   
-    
-def main(query=xmlfile, maxsearch=1, wait=(1, 1)):
+xmlfile = 'query002.xml'    
+def main(query=xmlfile, maxsearch=1, locale='disk',
+         diskroot=adsDIR, urlroot=arxivURL):
     """ main
     """ 
-    print 'query: %s' % query   
+    print 'query: % s' % query   
     data = parseADSXML(query, tags)
-    tmpdir = tempfile.mkdtemp()
 
     bibcodes = data.keys()
     for bib in bibcodes[:maxsearch]:
-        print 'starting %s' % bib
-        epid = data[bib]['eprintid'].lower()
+        print 'starting % s' % bib
+        epid = pparXiv(data[bib]['eprintid'], auth='arXiv')
         datasets = []
-        if epid != '':
-            datasets = searchArXivSource(epid, cmd='dataset',
-                                 textfilter='begin{document}', tmpdir=tmpdir)
+        if epid != {}:
+            wdir, sources = getSources(epid, locale,
+                                       diskroot=diskroot, urlroot=urlroot)
+            content = []
+            data[bib]['sources'] = []
+            for s in sources:
+                f = os.path.join(wdir, s['file'])
+                tcontent = processSource(f, type=s['type'],
+                                         encoding=s['encoding'],
+                                         action='read')
+                if tcontent != []:
+                    data[bib]['sources'].append(f)
+                    content.extend(tcontent)
+                                
+            datasets = searchSource(content, cmd='dataset')
         else:
             print 'no eprint'
         data[bib]['datasets'] = datasets
-        w = random.uniform(wait[0] - wait[1], wait[0] + wait[1])
-        print 'waiting %s seconds' % w
-        time.sleep(w)
+#        w = random.uniform(wait[0] - wait[1], wait[0] + wait[1])
+#        print 'waiting % s seconds' % w
+#        time.sleep(w)
         print '\n'
-    cleanup = cleanupSource(tmpdir)
+#    cleanup = cleanupSource(tmpdir)
     return data
 
 if __name__ == "__main__":
@@ -373,8 +566,9 @@ stex.append("\dataset [ADS/Sa.CXO#obs/07338] {ObsID 7338}")
 stex.append("(\dataset[ADS/Sa.CXO\#obs/07338]\n{ObsID 7338})")
 stex.append("(\dataset[ADS/Sa.CXO\#obs/07338]\\n{ObsID 7338})")
 
-dtex = ['ADS/Sa.CXO#obs/07338']
+dtex = ['ADS / Sa.CXO#obs/07338']
 dtex.append('ADS/Sa.CXO\#obs/07338')
 dtex.append('ADS/Sa.CXO\\#obs/07338%d3')
 
 otex = ["\objectname[Name Orion Nebula Cluster]{Orion Nebula Cluster}"]
+
