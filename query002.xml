@@ -1,0 +1,289 @@
+<?xml version="1.0"?>
+<records xmlns="http://ads.harvard.edu/schema/abs/1.0/references" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://ads.harvard.edu/schema/abs/1.0/references http://ads.harvard.edu/schema/abs/1.0/references.xsd" retrieved="5" start="1" selected="5">
+<record>
+<bibcode>2008ApJ...686..508N</bibcode>
+<title>Deep Chandra Observation of the Pulsar Wind Nebula Powered by Pulsar PSR J1846-0258 in the Supernova Remnant Kes 75</title>
+<author>Ng, C.-Y.</author>
+<author>Slane, P. O.</author>
+<author>Gaensler, B. M.</author>
+<author>Hughes, J. P.</author>
+<journal>The Astrophysical Journal, Volume 686, Issue 1, pp. 508-519.</journal>
+<pubdate>Oct 2008</pubdate>
+<link type="ABSTRACT">
+  <name>Abstract</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2008ApJ...686..508N&#38;link_type=ABSTRACT</url>
+</link>
+<link type="EJOURNAL">
+  <name>Electronic On-line Article (HTML)</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2008ApJ...686..508N&#38;link_type=EJOURNAL</url>
+</link>
+<link type="ARTICLE">
+  <name>Full Printable Article (PDF/Postscript)</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2008ApJ...686..508N&#38;link_type=ARTICLE</url>
+</link>
+<link type="PREPRINT">
+  <name>arXiv e-print</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2008ApJ...686..508N&#38;link_type=PREPRINT</url>
+</link>
+<link type="DATA">
+  <name>On-line Data</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2008ApJ...686..508N&#38;link_type=DATA</url>
+</link>
+<link type="REFERENCES">
+  <name>References in the Article</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2008ApJ...686..508N&#38;link_type=REFERENCES</url>
+</link>
+<link type="CITATIONS">
+  <name>Citations to the Article</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2008ApJ...686..508N&#38;link_type=CITATIONS</url>
+</link>
+<link type="REFCIT">
+  <name>Refereed Citations to the Article</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2008ApJ...686..508N&#38;link_type=REFCIT</url>
+</link>
+<link type="SIMBAD">
+  <name>SIMBAD Objects</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2008ApJ...686..508N&#38;link_type=SIMBAD</url>
+</link>
+<link type="AR">
+  <name>Also-Read Articles</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2008ApJ...686..508N&#38;link_type=AR</url>
+</link>
+<score>1.000</score>
+<citations>9</citations>
+<DOI>10.1086/591146</DOI>
+<eprintid>arXiv:0804.3384</eprintid>
+</record>
+
+<record>
+<bibcode>2008ApJ...677.1233C</bibcode>
+<title>Investigating the Nature of Absorption Lines in the Chandra X-Ray Spectra of the Neutron Star Binary 4U 1820-30</title>
+<author>Cackett, E. M.</author>
+<author>Miller, J. M.</author>
+<author>Raymond, J.</author>
+<author>Homan, J.</author>
+<author>van der Klis, M.</author>
+<author>Méndez, M.</author>
+<author>Steeghs, D.</author>
+<author>Wijnands, R.</author>
+<journal>The Astrophysical Journal, Volume 677, Issue 2, pp. 1233-1240.</journal>
+<pubdate>Apr 2008</pubdate>
+<link type="ABSTRACT">
+  <name>Abstract</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2008ApJ...677.1233C&#38;link_type=ABSTRACT</url>
+</link>
+<link type="EJOURNAL">
+  <name>Electronic On-line Article (HTML)</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2008ApJ...677.1233C&#38;link_type=EJOURNAL</url>
+</link>
+<link type="ARTICLE">
+  <name>Full Printable Article (PDF/Postscript)</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2008ApJ...677.1233C&#38;link_type=ARTICLE</url>
+</link>
+<link type="PREPRINT">
+  <name>arXiv e-print</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2008ApJ...677.1233C&#38;link_type=PREPRINT</url>
+</link>
+<link type="DATA">
+  <name>On-line Data</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2008ApJ...677.1233C&#38;link_type=DATA</url>
+</link>
+<link type="REFERENCES">
+  <name>References in the Article</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2008ApJ...677.1233C&#38;link_type=REFERENCES</url>
+</link>
+<link type="CITATIONS">
+  <name>Citations to the Article</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2008ApJ...677.1233C&#38;link_type=CITATIONS</url>
+</link>
+<link type="REFCIT">
+  <name>Refereed Citations to the Article</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2008ApJ...677.1233C&#38;link_type=REFCIT</url>
+</link>
+<link type="SIMBAD">
+  <name>SIMBAD Objects</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2008ApJ...677.1233C&#38;link_type=SIMBAD</url>
+</link>
+<link type="AR">
+  <name>Also-Read Articles</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2008ApJ...677.1233C&#38;link_type=AR</url>
+</link>
+<score>1.000</score>
+<citations>4</citations>
+<DOI>10.1086/529483</DOI>
+<eprintid>arXiv:astro-ph/0703371</eprintid>
+</record>
+
+<record>
+<bibcode>2008ApJ...676..610W</bibcode>
+<title>X-Ray Flaring on the dMe Star, Ross 154</title>
+<author>Wargelin, B. J.</author>
+<author>Kashyap, V. L.</author>
+<author>Drake, J. J.</author>
+<author>García-Alvarez, D.</author>
+<author>Ratzlaff, P. W.</author>
+<journal>The Astrophysical Journal, Volume 676, Issue 1, pp. 610-627.</journal>
+<pubdate>Mar 2008</pubdate>
+<link type="ABSTRACT">
+  <name>Abstract</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2008ApJ...676..610W&#38;link_type=ABSTRACT</url>
+</link>
+<link type="EJOURNAL">
+  <name>Electronic On-line Article (HTML)</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2008ApJ...676..610W&#38;link_type=EJOURNAL</url>
+</link>
+<link type="ARTICLE">
+  <name>Full Printable Article (PDF/Postscript)</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2008ApJ...676..610W&#38;link_type=ARTICLE</url>
+</link>
+<link type="PREPRINT">
+  <name>arXiv e-print</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2008ApJ...676..610W&#38;link_type=PREPRINT</url>
+</link>
+<link type="DATA">
+  <name>On-line Data</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2008ApJ...676..610W&#38;link_type=DATA</url>
+</link>
+<link type="REFERENCES">
+  <name>References in the Article</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2008ApJ...676..610W&#38;link_type=REFERENCES</url>
+</link>
+<link type="CITATIONS">
+  <name>Citations to the Article</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2008ApJ...676..610W&#38;link_type=CITATIONS</url>
+</link>
+<link type="REFCIT">
+  <name>Refereed Citations to the Article</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2008ApJ...676..610W&#38;link_type=REFCIT</url>
+</link>
+<link type="SIMBAD">
+  <name>SIMBAD Objects</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2008ApJ...676..610W&#38;link_type=SIMBAD</url>
+</link>
+<link type="AR">
+  <name>Also-Read Articles</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2008ApJ...676..610W&#38;link_type=AR</url>
+</link>
+<score>1.000</score>
+<citations>8</citations>
+<DOI>10.1086/528702</DOI>
+<eprintid>arXiv:0712.2791</eprintid>
+</record>
+
+<record>
+<bibcode>2007ApJS..173...70G</bibcode>
+<title>The X-Ray Binary Population in M33. II. X-Ray Spectra and Variability</title>
+<author>Grimm, H.-J.</author>
+<author>McDowell, J.</author>
+<author>Zezas, A.</author>
+<author>Kim, D.-W.</author>
+<author>Fabbiano, G.</author>
+<journal>The Astrophysical Journal Supplement Series, Volume 173, Issue 1, pp. 70-84.</journal>
+<pubdate>Nov 2007</pubdate>
+<link type="ABSTRACT">
+  <name>Abstract</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2007ApJS..173...70G&#38;link_type=ABSTRACT</url>
+</link>
+<link type="EJOURNAL">
+  <name>Electronic On-line Article (HTML)</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2007ApJS..173...70G&#38;link_type=EJOURNAL</url>
+</link>
+<link type="ARTICLE">
+  <name>Full Printable Article (PDF/Postscript)</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2007ApJS..173...70G&#38;link_type=ARTICLE</url>
+</link>
+<link type="PREPRINT">
+  <name>arXiv e-print</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2007ApJS..173...70G&#38;link_type=PREPRINT</url>
+</link>
+<link type="DATA">
+  <name>On-line Data</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2007ApJS..173...70G&#38;link_type=DATA</url>
+</link>
+<link type="REFERENCES">
+  <name>References in the Article</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2007ApJS..173...70G&#38;link_type=REFERENCES</url>
+</link>
+<link type="CITATIONS">
+  <name>Citations to the Article</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2007ApJS..173...70G&#38;link_type=CITATIONS</url>
+</link>
+<link type="REFCIT">
+  <name>Refereed Citations to the Article</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2007ApJS..173...70G&#38;link_type=REFCIT</url>
+</link>
+<link type="SIMBAD">
+  <name>SIMBAD Objects</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2007ApJS..173...70G&#38;link_type=SIMBAD</url>
+</link>
+<link type="NED">
+  <name>NED Objects</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2007ApJS..173...70G&#38;link_type=NED</url>
+</link>
+<link type="AR">
+  <name>Also-Read Articles</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2007ApJS..173...70G&#38;link_type=AR</url>
+</link>
+<score>1.000</score>
+<citations>6</citations>
+<DOI>10.1086/519952</DOI>
+<eprintid>arXiv:0706.3927</eprintid>
+</record>
+
+<record>
+<bibcode>2007AJ....134..411M</bibcode>
+<title>A Spitzer Census of the IC 348 Nebula</title>
+<author>Muench, August A.</author>
+<author>Lada, Charles J.</author>
+<author>Luhman, K. L.</author>
+<author>Muzerolle, James</author>
+<author>Young, Erick</author>
+<journal>The Astronomical Journal, Volume 134, Issue 1, pp. 411-444.</journal>
+<pubdate>Jul 2007</pubdate>
+<link type="ABSTRACT">
+  <name>Abstract</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2007AJ....134..411M&#38;link_type=ABSTRACT</url>
+</link>
+<link type="EJOURNAL">
+  <name>Electronic On-line Article (HTML)</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2007AJ....134..411M&#38;link_type=EJOURNAL</url>
+</link>
+<link type="ARTICLE">
+  <name>Full Printable Article (PDF/Postscript)</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2007AJ....134..411M&#38;link_type=ARTICLE</url>
+</link>
+<link type="PREPRINT">
+  <name>arXiv e-print</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2007AJ....134..411M&#38;link_type=PREPRINT</url>
+</link>
+<link type="DATA">
+  <name>On-line Data</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2007AJ....134..411M&#38;link_type=DATA</url>
+</link>
+<link type="REFERENCES">
+  <name>References in the Article</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2007AJ....134..411M&#38;link_type=REFERENCES</url>
+</link>
+<link type="CITATIONS">
+  <name>Citations to the Article</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2007AJ....134..411M&#38;link_type=CITATIONS</url>
+</link>
+<link type="REFCIT">
+  <name>Refereed Citations to the Article</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2007AJ....134..411M&#38;link_type=REFCIT</url>
+</link>
+<link type="SIMBAD">
+  <name>SIMBAD Objects</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2007AJ....134..411M&#38;link_type=SIMBAD</url>
+</link>
+<link type="AR">
+  <name>Also-Read Articles</name>
+  <url>http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2007AJ....134..411M&#38;link_type=AR</url>
+</link>
+<score>1.000</score>
+<citations>39</citations>
+<DOI>10.1086/518560</DOI>
+<eprintid>arXiv:0704.0203</eprintid>
+</record>
+
+</records>
