@@ -18,7 +18,7 @@ from urlparse import urlparse
 
 
 adsDIR = '/proj/adsduo/abstracts/sources/ArXiv/fulltext'
-adsDIR = '/Users/aamn/Projects/Seamless/Studies and Projects/ADS_DataLinks/ArXivData'
+adsDIR = '../../../Data/astrodatacite/ADS'
 arxivURL = 'http://arxiv.org/e-print/'
 arXivArchives = ['astro-ph', 'cond-mat', 'gr-qc', 'hep-ex', 'hep-lat',
                  'hep-ph', 'hep-th', 'math-ph', 'nucl-ex', 'nucl-th',
