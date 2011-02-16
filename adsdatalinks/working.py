@@ -41,3 +41,16 @@ linktypes = linkdict.keys()
 
 keys = ['bibcode','journal','pubyear']
 
+dsl = linkdict['DatasetLink']
+
+dsl_pubyear = repackdictlist(dsl,rkey="pubyear")
+
+years = dsl_pubyear.keys()
+years.sort()
+for year in years:
+    uniq_bibcodes = set()
+    yearlinks = dsl_pubyear[year]
+    for link in yearlinks: uniq_bibcodes.add(link['bibcode'])
+    print year, len(yearlinks), len(uniq_bibcodes)
+
+
