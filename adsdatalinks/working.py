@@ -56,6 +56,7 @@ dsl_pubyear = repackdictlist(dsl,rkey="pubyear")
 
 years = dsl_pubyear.keys()
 years.sort()
+authorstot = set()
 for year in years:
     bibcodes = set()
     authors = set()
@@ -66,7 +67,9 @@ for year in years:
         if xbib not in bibcodes:
             surnames = surname(xsrc)
             authors.add(surnames[0])
-            print year,xbib,surnames[0]
+            #print year,xbib,surnames[0]
         bibcodes.add(xbib)
     print year, len(yearlinks), len(bibcodes), len(authors)
+    authorstot.update(authors)
+    print len(authorstot)
 
