@@ -2,6 +2,8 @@
 from collections import defaultdict
 from simplejson import load
 
+from BeautifulSoup import BeautifulStoneSoup
+
 def countkeys(dictlist,
               dictkeys = ['bibcode','journal','pubyear']):
     t = {}
@@ -29,6 +31,13 @@ def repackdictlist(dictlist,
     
     return t
         
+def surname(filename):
+    source = file(filename)
+    parsed = BeautifulStoneSoup(source)
+    source.close()
+    names = [name.text for name in parsed.findAll('surname')]
+    return names
+
 
 d = "../../../Data/astrodatacite/ADS/extlinks.json"
 f = open(d,"r")
@@ -48,9 +57,16 @@ dsl_pubyear = repackdictlist(dsl,rkey="pubyear")
 years = dsl_pubyear.keys()
 years.sort()
 for year in years:
-    uniq_bibcodes = set()
+    bibcodes = set()
+    authors = set()
     yearlinks = dsl_pubyear[year]
-    for link in yearlinks: uniq_bibcodes.add(link['bibcode'])
-    print year, len(yearlinks), len(uniq_bibcodes)
-
+    for link in yearlinks: 
+        xbib = link['bibcode']
+        xsrc = link['fulltext source file']
+        if xbib not in bibcodes:
+            surnames = surname(xsrc)
+            authors.add(surnames[0])
+            print year,xbib,surnames[0]
+        bibcodes.add(xbib)
+    print year, len(yearlinks), len(bibcodes), len(authors)
 
