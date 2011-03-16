@@ -26,8 +26,8 @@ arXivArchives = ['astro-ph', 'cond-mat', 'gr-qc', 'hep-ex', 'hep-lat',
                  'q-fin', 'stat']
 
 tagformats = {}
-tagformats['eprintid'] = lambda x: x and x[0] or ''
-tagformats['DOI'] = lambda x: x and x[0] or ''
+tagformats['eprintid'] = lambda x: x and x[0] or None
+tagformats['DOI'] = lambda x: x and x[0] or None
 tagformats['citations'] = lambda x: x and int(x[0]) or 0
 tagformats['pubdate'] = lambda x: datetime.strptime(x[0], '%b %Y').date()
 tagformats['author'] = lambda x: x and {'1st':x[0], 'N':len(x)} or {'1st':'', 'N':0}
@@ -90,10 +90,12 @@ def _postarXivAction(s, loc, tok):
         tok['id'] = tok['archive'] + '/' + tok['issue'] + tok['number']
         tok['adspath'] = os.path.join(*[tok.get(k) 
                         for k in ['archive', 'fullyear']])
+        tok['adssrc'] = tok['issue']+tok['number']
     else:
         tok['id'] = tok['issue'] + "." + tok['number']
         tok['adspath'] = os.path.join(*[tok.get(k) 
                         for k in ['server', 'issue']])
+        tok['adssrc'] = tok['number']
     tok['eprintid'] = s
 
 def parseADSXML(xml, tags=tags):
@@ -332,7 +334,7 @@ def testppBibCode():
     for test in tests:
         assert ppBibCode(test[0]) == tuple(test[1:])
 
-def getSources(epid, locale='disk',
+def getSources(epid, locale='ads',
                  diskroot=adsDIR, urlroot=arxivURL):
     """ given a reference and a locale, 
         return the path to the source, 
@@ -340,18 +342,18 @@ def getSources(epid, locale='disk',
     """
     #A:  type is a subdirectory under the root
     #A:  ref is a
-    locales = ['disk', 'url']
+    locales = ['ads','disk', 'url']
     locale = locale in locales and locale or 'disk'
     
     wdir = ''
     wfiles = []
     wnames = ('file', 'type', 'encoding')
-    if locale == 'disk':
+    if locale == 'ads':
         wdir = os.path.abspath(os.path.join(diskroot, epid['adspath']))
         wfiles = [dict(
                        zip(wnames,
                            (g,) + mime.guess_type(g))) 
-                  for g in glob(wdir, '*' + epid['number'] + '.*')]
+                  for g in glob(wdir, '*' + epid['adssrc'] + '.*')]
     else:
         wdir = tempfile.mkdtemp()
         wfiles = ['foobar']
@@ -396,7 +398,7 @@ def processSource(s, type='application/x-tar', encoding=None, action='list',
     """ look in tarfile f for source files of extension ext; 
         return list of all content strings, one per file.
     """
-    actions = ['list', 'read']
+    actions = ['tlist', 'list', 'read']
     content = []
     processable = ['application/x-tex', 'application/x-tar', 'text/plain']
 
@@ -413,14 +415,19 @@ def processSource(s, type='application/x-tar', encoding=None, action='list',
     if type == 'application/x-tar':
         try:
             tar = tarfile.open(s)    
-            files = [n for n in tar.getnames() 
+            tlist = tar.getnames()
+            files = [n for n in tlist
                      if mime.guess_type(n)[0] in filefilter]
-            print ' ' * 4 + ' % -10s % s' % ('filtered files:', len(files))
         
             if len(files) == 0:
                 tar.close()
                 return content
+
+            if action == 'tlist':
+                tar.close()
+                return tlist
         
+            print ' ' * 4 + ' % -10s % s' % ('filtered files:', len(files))
             for name in files:
                 status = 'added'
                 if action == 'list':
@@ -446,6 +453,9 @@ def processSource(s, type='application/x-tar', encoding=None, action='list',
     else:
         status = 'added'
         name = os.path.basename(not encoding and s or os.path.splitext(s)[0])
+        if action == 'tlist':
+            content.append(name)
+            return content
         if mime.guess_type(name) not in filefilter: 
             return content
         if action == 'list':
