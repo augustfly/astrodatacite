@@ -7,12 +7,19 @@ import mimetypes as mime
 
 import os, json
 
-maxsearch = 10
+maxsearch = 100000
 locale = 'ads'
 jsnfile = 'aas2009.json'
 xmlfile = 'aas2009_references.xml'
 adsDIR = '/proj/adsduo/abstracts/sources/ArXiv/fulltext'
 fkeys = ['bibcode','eprintid','file','extension','mimetype','encoding','pathlength']
+
+_key_formater = {}
+_key_formater['file'] = lambda x:x
+_key_formater['extension'] = lambda x:os.path.splitext(x)[1][1:]
+_key_formater['mimetype'] = lambda x:mime.guess_type(x)[0] or 'extension/'+os.path.splitext(x)[1][1:]
+_key_formater['encoding'] = lambda x:mime.guess_type(x)[1] 
+_key_formater['pathlength'] = lambda x:len(x.split(os.path.sep))-1
 
 
 def tabulate_files(query=xmlfile, maxsearch=1, locale='ads',
@@ -44,11 +51,11 @@ def tabulate_files(query=xmlfile, maxsearch=1, locale='ads',
                 #[bib,t,ext,mime,pathlenght]
                 print tcontent
                 for t in tcontent:
-                    finfo = binfo
-                    finfo.append(t)
-                    finfo.append(os.path.splitext(t)[1])
-                    finfo.extend(mime.guess_type(t))
-                    finfo.append(len(t.split(os.path.sep))-1)
+                    finfo = []
+                    finfo.extend(binfo)
+                    for k in fkeys[2:]:
+                        finfo.append(_key_formater[k](t))
+
                     files.append(dict(zip(fkeys,finfo)))
                     print finfo
         else:
