@@ -7,27 +7,28 @@ from ads_arXiv import adsXML2JSON, default_tags
 
 import os, sys
 
-defs = {}
-defs['source'] = lambda x:os.path.exists(x) and x or None
-defs['type'] = lambda x:x != "" and x or 'json'
-defs['outfile'] = lambda x:x != "" and x or "default" 
-defs['tags'] = lambda x:x != "" and x.split(',') or default_tags
+arg_defs = {}
+arg_defs['source'] = lambda x:os.path.exists(x) and x or None
+arg_defs['type'] = lambda x:x != "" and x or 'json'
+arg_defs['outfile'] = lambda x:x != "" and x or "default" 
+arg_defs['tags'] = lambda x:x != "" and x.split(',') or default_tags
+arg_keys = ['source','type','outfile','tags']
 
 def main(argv=None):
     convertto = ['json']
-    args = ['source','type','outfile','tags']
-
+    args = arg_keys
+    larg = len(args)
     if argv == None:
         if sys.argv[1:] == []:
             print 'cmd variables are in order: ',args
             return
         argv = []
         argv.extend(sys.argv[1:])
-        argv.extend(["","","",""])
-        argv = argv[:4]
+        argv.extend([""]*larg)
+        argv = argv[:larg]
 
     for i,arg in enumerate(args):
-        argv[i] = defs[arg](argv[i])
+        argv[i] = arg_defs[arg](argv[i])
 
     argd = dict(zip(args,argv))
     

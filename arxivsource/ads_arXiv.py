@@ -33,7 +33,7 @@ tagformats = {}
 tagformats['eprintid'] = lambda x: x and x[0] or None
 tagformats['DOI'] = lambda x: x and x[0] or None
 tagformats['citations'] = lambda x: x and int(x[0]) or 0
-tagformats['pubdate'] = lambda x: datetime.strptime(x[0], '%b %Y').date()
+tagformats['pubdate'] = lambda x: dt_guesser(dt_scrubit(x[0])).date()
 tagformats['author'] = lambda x: x and {'1st':x[0], 'N':len(x)} or {'1st':'', 'N':0}
 
 fsl = pp.Literal('/')
@@ -43,6 +43,28 @@ lsb = pp.Literal('[')
 rsb = pp.Literal(']')
 lcb = pp.Literal('{')
 rcb = pp.Literal('}')
+
+ads_dt_scrubit = [('n/a','01')]
+def dt_scrubit(idt, scrubit=ads_dt_scrubit):
+    dt = idt
+    for s, i in scrubit:
+        dt = dt.replace(s,i)
+    return dt
+        
+ads_dt_formats = ['%b %Y', '%B %Y', '%m/%Y', '%m %Y']
+def dt_guesser(idt, dt_formats=ads_dt_formats):
+    guess = False
+    cnt = 0
+    dt = None
+    while not guess and cnt != len(dt_formats):
+        try:
+            #print idt, dt_formats[cnt],'\n'
+            dt = datetime.strptime(idt,dt_formats[cnt])
+            guess = True
+        except:
+            guess = False
+            cnt += 1
+    return dt
 
 class TeXCmd(object):
     """ class container for LaTeX commands
