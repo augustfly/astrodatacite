@@ -489,10 +489,13 @@ def processSource(s, type='application/x-tar', encoding=None, action='list',
                 print ' ' * 6 + ' % -10s % s (% s)' % ('file:', name, status)
             tar.close()
         except Exception, e:
-            if tarfile.is_tarfile(s):
-                raise IOError('could not open tar file: ' + s)
-            else: 
-                raise IOError('source is not a tar file: ' + s)
+            print ' ' * 4 + ' %-10s %s' % ('could not open', s)
+            print ' ' * 6 + ' %-10s %s' % ('error:', e)
+            #if tarfile.is_tarfile(s):
+                #raise IOError('could not open tar file: ' + s)
+            #else: 
+                #raise IOError('source is not a tar file: ' + s)
+                #print ' ' * 4 + ' %-10s %s' % ('not a tarfile',s)
     else:
         status = 'added'
         name = os.path.basename(not encoding and s or os.path.splitext(s)[0])
